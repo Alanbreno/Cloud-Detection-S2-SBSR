@@ -1,0 +1,19 @@
+{
+  "_model_class": "Unet",
+  "activation": null,
+  "aux_params": null,
+  "classes": 4,
+  "decoder_attention_type": null,
+  "decoder_channels": [
+    256,
+    128,
+    64,
+    32,
+    16
+  ],
+  "decoder_use_batchnorm": true,
+  "encoder_depth": 5,
+  "encoder_name": "mobilenet_v2",
+  "encoder_weights": null,
+  "in_channels": 13
+}
