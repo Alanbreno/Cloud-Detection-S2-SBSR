@@ -175,7 +175,10 @@ class CoreDataModule(pl.LightningDataModule):
         )
 
 # %%
-dir_root = '/home/mseruffo/Unet/'
+encoder_name="mobilenet_v2"
+name="Unet_"+encoder_name
+dir_root = '/home/mseruffo/Unet/lightning_logs/'+name
+log_path = "/home/mseruffo/Unet/lightning_logs/"
 batch_size = 16
 EPOCHS = 100
 
@@ -186,7 +189,7 @@ EPOCHS = 100
 class UNet_S2_Br(pl.LightningModule):
     def __init__(self):
         super().__init__()
-        self.model = smp.Unet(encoder_name="mobilenet_v2", encoder_weights=None, classes=4, in_channels=13)
+        self.model = smp.Unet(encoder_name=encoder_name, encoder_weights=None, classes=4, in_channels=13)
         self.loss = torch.nn.CrossEntropyLoss()
 
         self.training_step_outputs = []
@@ -326,7 +329,7 @@ earlystopping_callback = pl.callbacks.EarlyStopping(
 callbacks = [checkpoint_callback, earlystopping_callback]
 
 
-tb_logger = TensorBoardLogger("/home/mseruffo/Unet/lightning_logs/", name="UNet_S2_Br")
+tb_logger = TensorBoardLogger(log_path, name=name)
 
 # Define the trainer
 trainer = pl.Trainer(
@@ -384,7 +387,7 @@ earlystopping_callback = pl.callbacks.EarlyStopping(
 callbacks = [checkpoint_callback, earlystopping_callback]
 
 
-tb_logger = TensorBoardLogger("/home/mseruffo/Unet/lightning_logs/", name="UNet_S2_Br")
+tb_logger = TensorBoardLogger(log_path, name=name)
 
 # Define the trainer
 trainer = pl.Trainer(
@@ -448,7 +451,7 @@ earlystopping_callback = pl.callbacks.EarlyStopping(
 callbacks = [checkpoint_callback, earlystopping_callback]
 
 
-tb_logger = TensorBoardLogger("/home/mseruffo/Unet/lightning_logs/", name="UNet_S2_Br")
+tb_logger = TensorBoardLogger(log_path, name=name)
 
 # Define the trainer
 trainer = pl.Trainer(
@@ -535,6 +538,6 @@ print(f'Recall no conjunto de teste: {recall:.4f}')
 # %%
 smp_model = model.model
 # if push_to_hub=True, model will be saved to repository with this name
-smp_model.save_pretrained('/content/drive/MyDrive/Unet/Unet_S2_Br_mobilenet_v2')
+smp_model.save_pretrained(dir_root + name)
 
 
