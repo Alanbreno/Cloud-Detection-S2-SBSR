@@ -539,6 +539,6 @@ print(f'Recall no conjunto de teste: {recall:.4f}')
 # %%
 smp_model = model.model
 # if push_to_hub=True, model will be saved to repository with this name
-smp_model.save_pretrained(dir_root + name)
+smp_model.save_pretrained(dir_root + "/" + name)
 
 
