@@ -48,7 +48,6 @@ callbacks = [checkpoint_callback, earlystopping_callback]
 # Define the trainer
 trainer = pl.Trainer(
     max_epochs=config.EPOCHS,
-    callbacks=callbacks,
     log_every_n_steps=1,
     callbacks=callbacks,
     accelerator=config.ACCELERATOR,
