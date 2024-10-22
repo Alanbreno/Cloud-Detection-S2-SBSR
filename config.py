@@ -19,7 +19,7 @@ EPOCHS = 100
 BATCH_SIZE = 16
 CLASSES = 4
 IN_CHANNELS = 13
-ACCELERATOR = "AUTO"
+ACCELERATOR = "auto"
 
 DIR_BASE = "/home/mseruffo/"
 DIR_LOG = "/home/mseruffo/Unet/lightning_logs/"
