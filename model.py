@@ -6,13 +6,13 @@ from torch.optim import lr_scheduler
 
 
 class UNet_S2_Br(pl.LightningModule):
-    def __init__(self, encoder_name, classes, inchannels, learning_rate):
+    def __init__(self, encoder_name, classes, in_channels, learning_rate):
         super().__init__()
         self.model = smp.Unet(
             encoder_name=encoder_name,
             encoder_weights=None,
             classes=classes,
-            in_channels=inchannels,
+            in_channels=in_channels,
         )
         self.loss = torch.nn.CrossEntropyLoss()
         self.lr = learning_rate
