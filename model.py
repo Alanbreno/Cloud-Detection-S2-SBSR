@@ -16,6 +16,7 @@ class UNet_S2_Br(pl.LightningModule):
         )
         self.loss = torch.nn.CrossEntropyLoss()
         self.lr = learning_rate
+        self.save_hyperparameters()
         self.training_step_outputs = []
         self.validation_step_outputs = []
         self.test_step_outputs = []
@@ -30,10 +31,10 @@ class UNet_S2_Br(pl.LightningModule):
         fn = torch.cat([x["fn"] for x in outputs])
         tn = torch.cat([x["tn"] for x in outputs])
 
-        accuracy = smp.metrics.accuracy(tp, fp, fn, tn, reduction="micro")
-        iou = smp.metrics.iou_score(tp, fp, fn, tn, reduction="micro")
-        f1_score = smp.metrics.f1_score(tp, fp, fn, tn, reduction="micro")
-        recall = smp.metrics.recall(tp, fp, fn, tn, reduction="micro")
+        accuracy = smp.metrics.accuracy(tp, fp, fn, tn, reduction="weighted")
+        iou = smp.metrics.iou_score(tp, fp, fn, tn, reduction="weighted")
+        f1_score = smp.metrics.f1_score(tp, fp, fn, tn, reduction="weighted")
+        recall = smp.metrics.recall(tp, fp, fn, tn, reduction="weighted")
 
         metrics = {
             f"{stage}_acuracia": accuracy,
@@ -42,7 +43,7 @@ class UNet_S2_Br(pl.LightningModule):
             f"{stage}_recall": recall,
         }
 
-        self.log_dict(metrics, prog_bar=True)
+        self.log_dict(metrics, on_epoch=True)
 
     def training_step(self, batch, batch_idx):
         x, y = batch
@@ -66,7 +67,7 @@ class UNet_S2_Br(pl.LightningModule):
             }
         )
 
-        self.log("train_loss", loss, on_step=True, on_epoch=True, prog_bar=True)
+        self.log("train_loss", loss, on_epoch=True)
         return loss
 
     def on_train_epoch_end(self):
@@ -97,7 +98,7 @@ class UNet_S2_Br(pl.LightningModule):
             }
         )
 
-        self.log("val_loss", loss, prog_bar=True)
+        self.log("val_loss", loss, on_epoch=True)
         return loss
 
     def on_validation_epoch_end(self):
@@ -127,7 +128,7 @@ class UNet_S2_Br(pl.LightningModule):
             }
         )
 
-        self.log("test_loss", loss, prog_bar=True)
+        self.log("test_loss", loss, on_epoch=True)
         return loss
 
     def on_test_epoch_end(self):

@@ -27,16 +27,16 @@ def calculate_metrics(module, model):
     fn = torch.cat([x["fn"] for x in steps_outputs_metrics])
     tn = torch.cat([x["tn"] for x in steps_outputs_metrics])
 
-    acuracia = smp.metrics.accuracy(tp, fp, fn, tn, reduction="micro-imagewise")
+    acuracia = smp.metrics.accuracy(tp, fp, fn, tn, reduction="weighted")
     acuracia_balanceada = smp.metrics.balanced_accuracy(
-        tp, fp, fn, tn, reduction="micro-imagewise"
+        tp, fp, fn, tn, reduction="weighted"
     )
-    iou = smp.metrics.iou_score(tp, fp, fn, tn, reduction="micro-imagewise")
-    f1_score = smp.metrics.f1_score(tp, fp, fn, tn, reduction="micro-imagewise")
+    iou = smp.metrics.iou_score(tp, fp, fn, tn, reduction="weighted")
+    f1_score = smp.metrics.f1_score(tp, fp, fn, tn, reduction="weighted")
     f2_score = smp.metrics.fbeta_score(
-        tp, fp, fn, tn, beta=2, reduction="micro-imagewise"
+        tp, fp, fn, tn, beta=2, reduction="weighted"
     )
-    recall = smp.metrics.recall(tp, fp, fn, tn, reduction="micro-imagewise")
+    recall = smp.metrics.recall(tp, fp, fn, tn, reduction="weighted")
 
     print(f"Acurácia no conjunto de teste: {acuracia:.4f}")
     print(f"Acurácia Balanceada no conjunto de teste: {acuracia_balanceada:.4f}")
