@@ -11,7 +11,7 @@ import metrics
 # Para usar modelos diferentes, basta adicionar as variáveis correspondentes no arquivo config.py
 
 # Primeiro Treinamento com as imagens NoLabel
-tb_logger = TensorBoardLogger(config.DIR_LOG, name=config.NAME_MOBILENET)
+tb_logger = TensorBoardLogger(config.DIR_LOG, name=config.NAME_RESNET50)
 
 # Gera o dataframe com as imagem NoLabel
 df_nolabel = rpi.get_image_paths("nolabel", config.DIR_BASE)
@@ -27,14 +27,14 @@ datamodule = CoreDataModule(
 
 # Define the model
 model = UNet_S2_Br(
-    encoder_name=config.ENCODER_NAME_MOBILENET,
+    encoder_name=config.ENCODER_NAME_RESNET50,
     classes=config.CLASSES,
     in_channels=config.IN_CHANNELS,
     learning_rate=config.LEARNING_RATE,
 )
 
 checkpoint_callback = pl.callbacks.ModelCheckpoint(
-    dirpath=config.DIR_ROOT_MOBILENET,
+    dirpath=config.DIR_ROOT_RESNET50,
     filename="{epoch}-{train_loss:.2f}-{val_loss:.2f}-trainNoLabel",
     monitor="val_loss",
     mode="min",
@@ -55,7 +55,7 @@ trainer = pl.Trainer(
     accelerator=config.ACCELERATOR,
     precision="16-mixed",
     logger=tb_logger,
-    default_root_dir=config.DIR_ROOT_MOBILENET,
+    default_root_dir=config.DIR_ROOT_RESNET50,
 )
 
 # Start the training
@@ -63,7 +63,7 @@ trainer.fit(model=model, datamodule=datamodule)
 # Carregar o melhor modelo diretamente
 model = UNet_S2_Br.load_from_checkpoint(
     checkpoint_callback.best_model_path,
-    encoder_name=config.ENCODER_NAME_MOBILENET,
+    encoder_name=config.ENCODER_NAME_RESNET50,
     classes=config.CLASSES,
     in_channels=config.IN_CHANNELS,
     learning_rate=config.LEARNING_RATE,
@@ -72,7 +72,7 @@ model = UNet_S2_Br.load_from_checkpoint(
 
 # Executa o segundo treinamento com as imagens Scribble
 checkpoint_callback = pl.callbacks.ModelCheckpoint(
-    dirpath=config.DIR_ROOT_MOBILENET,
+    dirpath=config.DIR_ROOT_RESNET50,
     filename="{epoch}-{train_loss:.2f}-{val_loss:.2f}-trainScribble",
     monitor="val_loss",
     mode="min",
@@ -86,7 +86,7 @@ earlystopping_callback = pl.callbacks.EarlyStopping(
 callbacks = [checkpoint_callback, earlystopping_callback]
 
 
-tb_logger = TensorBoardLogger(config.DIR_LOG, name=config.NAME_MOBILENET)
+tb_logger = TensorBoardLogger(config.DIR_LOG, name=config.NAME_RESNET50)
 
 # Define the trainer
 trainer = pl.Trainer(
@@ -96,7 +96,7 @@ trainer = pl.Trainer(
     accelerator=config.ACCELERATOR,
     precision="16-mixed",
     logger=tb_logger,
-    default_root_dir=config.DIR_ROOT_MOBILENET,
+    default_root_dir=config.DIR_ROOT_RESNET50,
 )
 
 df_scribble = rpi.get_image_paths("scribble", config.DIR_BASE)
@@ -116,7 +116,7 @@ trainer.fit(model=model, datamodule=datamodule)
 # Carregar o melhor modelo diretamente
 model = UNet_S2_Br.load_from_checkpoint(
     checkpoint_callback.best_model_path,
-    encoder_name=config.ENCODER_NAME_MOBILENET,
+    encoder_name=config.ENCODER_NAME_RESNET50,
     classes=config.CLASSES,
     in_channels=config.IN_CHANNELS,
     learning_rate=config.LEARNING_RATE,
@@ -131,7 +131,7 @@ print(test_metrics)
 
 # Executa o treinamento com as imagens HIGH
 checkpoint_callback = pl.callbacks.ModelCheckpoint(
-    dirpath=config.DIR_ROOT_MOBILENET,
+    dirpath=config.DIR_ROOT_RESNET50,
     filename="{epoch}-{train_loss:.2f}-{val_loss:.2f}-trainHigh",
     monitor="val_loss",
     mode="min",
@@ -144,7 +144,7 @@ earlystopping_callback = pl.callbacks.EarlyStopping(
 # Define the callbacks
 callbacks = [checkpoint_callback, earlystopping_callback]
 
-tb_logger = TensorBoardLogger(config.DIR_LOG, name=config.NAME_MOBILENET)
+tb_logger = TensorBoardLogger(config.DIR_LOG, name=config.NAME_RESNET50)
 
 df = rpi.get_image_paths("high", config.DIR_BASE)
 
@@ -159,7 +159,7 @@ trainer = pl.Trainer(
     accelerator=config.ACCELERATOR,
     precision="16-mixed",
     logger=tb_logger,
-    default_root_dir=config.DIR_ROOT_MOBILENET,
+    default_root_dir=config.DIR_ROOT_RESNET50,
 )
 
 # Start the training
@@ -168,7 +168,7 @@ trainer.fit(model=model, datamodule=datamodule)
 # Carregar o melhor modelo diretamente
 model = UNet_S2_Br.load_from_checkpoint(
     checkpoint_callback.best_model_path,
-    encoder_name=config.ENCODER_NAME_MOBILENET,
+    encoder_name=config.ENCODER_NAME_RESNET50,
     classes=config.CLASSES,
     in_channels=config.IN_CHANNELS,
     learning_rate=config.LEARNING_RATE,
@@ -187,4 +187,4 @@ acuracia, acuracia_balanceada, iou, f1_score, f2_score, recall = metrics.calcula
 
 # Salva o modelo treinado
 smp_model = model.model
-smp_model.save_pretrained(config.DIR_ROOT_MOBILENET + "/" + config.NAME_MOBILENET)
+smp_model.save_pretrained(config.DIR_ROOT_RESNET50 + "/" + config.NAME_RESNET50)
