@@ -166,7 +166,13 @@ trainer = pl.Trainer(
 trainer.fit(model=model, datamodule=datamodule)
 
 # Carregar o melhor modelo diretamente
-model = UNet_S2_Br.load_from_checkpoint(checkpoint_callback.best_model_path)
+model = UNet_S2_Br.load_from_checkpoint(
+    checkpoint_callback.best_model_path,
+    encoder_name=config.ENCODER_NAME_MOBILENET,
+    classes=config.CLASSES,
+    in_channels=config.IN_CHANNELS,
+    learning_rate=config.LEARNING_RATE,
+)
 
 # run val dataset
 val_metrics = trainer.validate(model, datamodule=datamodule, verbose=True)
