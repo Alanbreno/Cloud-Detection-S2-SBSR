@@ -31,10 +31,10 @@ class UNet_S2_Br(pl.LightningModule):
         fn = torch.cat([x["fn"] for x in outputs])
         tn = torch.cat([x["tn"] for x in outputs])
 
-        accuracy = smp.metrics.accuracy(tp, fp, fn, tn, reduction="weighted")
-        iou = smp.metrics.iou_score(tp, fp, fn, tn, reduction="weighted")
-        f1_score = smp.metrics.f1_score(tp, fp, fn, tn, reduction="weighted")
-        recall = smp.metrics.recall(tp, fp, fn, tn, reduction="weighted")
+        accuracy = smp.metrics.accuracy(tp, fp, fn, tn, reduction="macro")
+        iou = smp.metrics.iou_score(tp, fp, fn, tn, reduction="macro")
+        f1_score = smp.metrics.f1_score(tp, fp, fn, tn, reduction="macro")
+        recall = smp.metrics.recall(tp, fp, fn, tn, reduction="macro")
 
         metrics = {
             f"{stage}_acuracia": accuracy,
