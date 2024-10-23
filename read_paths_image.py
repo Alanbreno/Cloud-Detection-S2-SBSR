@@ -1,9 +1,9 @@
-import os
 import pandas as pd
 import glob
 
+
 def get_image_paths(image_type, diretorio_base):
-    
+
     if image_type == "nolabel":
         # Listar arquivos de treino, validação e teste para as imagens de 512x512
         train_files_512_nolabel = glob.glob(
@@ -21,7 +21,7 @@ def get_image_paths(image_type, diretorio_base):
 
         # Concatenar todos os DataFrames
         df = pd.concat([train_df, val_df], ignore_index=True)
-        
+
     elif image_type == "scribble":
         # Listar arquivos de treino, validação e teste para as imagens de 512x512
         train_files_512_scribble = glob.glob(
@@ -46,7 +46,7 @@ def get_image_paths(image_type, diretorio_base):
 
         # Concatenar todos os DataFrames
         df = pd.concat([train_df, val_df, test_df], ignore_index=True)
-        
+
     elif image_type == "high":
         # Listar arquivos de treino, validação e teste para as imagens de 512x512
         train_files_512 = glob.glob(
@@ -87,6 +87,5 @@ def get_image_paths(image_type, diretorio_base):
 
         # Concatenar todos os DataFrames
         df = pd.concat([train_df, val_df, test_df], ignore_index=True)
-        
-        
+
     return df

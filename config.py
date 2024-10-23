@@ -6,6 +6,7 @@ ENCODER_NAME_EFICIENTNETB0 = "efficientnet-b0"
 ENCODER_NAME_EFICIENTNETB2 = "efficientnet-b2"
 ENCODER_NAME_EFICIENTNETB3 = "efficientnet-b3"
 
+# Nomes das pastas dos modelos
 NAME_MOBILENET = "Unet_mobilenet_v2"
 NAME_RESNET34 = "Unet_resnet34"
 NAME_RESNET50 = "Unet_resnet50"
@@ -13,7 +14,7 @@ NAME_EFICIENTNETB0 = "Unet_efficientnet-b0"
 NAME_EFICIENTNETB2 = "Unet_efficientnet-b2"
 NAME_EFICIENTNETB3 = "Unet_efficientnet-b3"
 
-# hiperparâmetros do modelo
+# Hiperparâmetros do modelo
 LEARNING_RATE = 0.001
 EPOCHS = 100
 BATCH_SIZE = 16
@@ -21,8 +22,11 @@ CLASSES = 4
 IN_CHANNELS = 13
 ACCELERATOR = "auto"
 
+# Diretórios
 DIR_BASE = "/home/mseruffo/"
 DIR_LOG = "/home/mseruffo/Unet/lightning_logs/"
+
+# Diretórios raiz dos modelos
 DIR_ROOT_MOBILENET = "/home/mseruffo/Unet/lightning_logs/Unet_mobilenet_v2"
 DIR_ROOT_RESNET34 = "/home/mseruffo/Unet/lightning_logs/Unet_resnet34"
 DIR_ROOT_RESNET50 = "/home/mseruffo/Unet/lightning_logs/Unet_resnet50"
