@@ -6,12 +6,12 @@ import torch.nn.functional as F
 def calculate_metrics(module, model):
     # Executa o teste para registro das métricas
     steps_outputs_metrics = []
+    class_pixel_counts = torch.zeros(4)  # Supondo 4 classes
 
     for images, gt_masks in module:
         with torch.no_grad():
             model.eval()
             logits = model(images)
-        # pr_masks = logits.sigmoid()
         pr_masks = F.softmax(logits, dim=1)
         pr_masks = torch.argmax(pr_masks, dim=1)
 
@@ -22,11 +22,19 @@ def calculate_metrics(module, model):
         )
         steps_outputs_metrics.append({"tp": tp, "fp": fp, "fn": fn, "tn": tn})
 
+        # Contar o número de pixels de cada classe
+        for i in range(4):
+            class_pixel_counts[i] += (gt_masks == i).sum()
+
+    # Calcular os pesos das classes
+    total_pixels = class_pixel_counts.sum()
+    class_weights = total_pixels / (4 * class_pixel_counts)
+
     tp = torch.cat([x["tp"] for x in steps_outputs_metrics])
     fp = torch.cat([x["fp"] for x in steps_outputs_metrics])
     fn = torch.cat([x["fn"] for x in steps_outputs_metrics])
     tn = torch.cat([x["tn"] for x in steps_outputs_metrics])
-
+    
     acuracia = smp.metrics.accuracy(tp, fp, fn, tn, reduction="macro")
     acuracia_balanceada = smp.metrics.balanced_accuracy(
         tp, fp, fn, tn, reduction="macro"
@@ -44,5 +52,6 @@ def calculate_metrics(module, model):
     print(f"F1 no conjunto de teste: {f1_score:.4f}")
     print(f"F2 no conjunto de teste: {f2_score:.4f}")
     print(f"Recall no conjunto de teste: {recall:.4f}")
+    print(f"Pesos das classes: {class_weights}")
 
-    return acuracia, acuracia_balanceada, iou, f1_score, f2_score, recall
+    return acuracia, acuracia_balanceada, iou, f1_score, f2_score, recall, class_weights
