@@ -1,16 +1,17 @@
 import torch
 import segmentation_models_pytorch as smp
 import torch.nn.functional as F
+from tqdm import tqdm  # Barra de progresso
+
 
 
 def calculate_metrics(module, model):
     # Executa o teste para registro das métricas
     steps_outputs_metrics = []
-    class_pixel_counts = torch.zeros(4)  # Supondo 4 classes
-
-    for images, gt_masks in module:
+    model.eval()
+    
+    for images, gt_masks in tqdm(module, desc="Calculando métricas"):
         with torch.no_grad():
-            model.eval()
             logits = model(images)
         pr_masks = F.softmax(logits, dim=1)
         pr_masks = torch.argmax(pr_masks, dim=1)
@@ -22,36 +23,33 @@ def calculate_metrics(module, model):
         )
         steps_outputs_metrics.append({"tp": tp, "fp": fp, "fn": fn, "tn": tn})
 
-        # Contar o número de pixels de cada classe
-        for i in range(4):
-            class_pixel_counts[i] += (gt_masks == i).sum()
-
-    # Calcular os pesos das classes
-    total_pixels = class_pixel_counts.sum()
-    class_weights = total_pixels / (4 * class_pixel_counts)
 
     tp = torch.cat([x["tp"] for x in steps_outputs_metrics])
     fp = torch.cat([x["fp"] for x in steps_outputs_metrics])
     fn = torch.cat([x["fn"] for x in steps_outputs_metrics])
     tn = torch.cat([x["tn"] for x in steps_outputs_metrics])
     
-    acuracia = smp.metrics.accuracy(tp, fp, fn, tn, reduction="macro")
-    acuracia_balanceada = smp.metrics.balanced_accuracy(
-        tp, fp, fn, tn, reduction="macro"
-    )
-    iou = smp.metrics.iou_score(tp, fp, fn, tn, reduction="macro")
-    f1_score = smp.metrics.f1_score(tp, fp, fn, tn, reduction="macro")
-    f2_score = smp.metrics.fbeta_score(
-        tp, fp, fn, tn, beta=2, reduction="macro"
-    )
-    recall = smp.metrics.recall(tp, fp, fn, tn, reduction="macro")
+    reductions = ["micro", "macro", "micro-imagewise", "macro-imagewise"]
+    
+    for reduction in reductions:
+        acuracia = smp.metrics.accuracy(tp, fp, fn, tn, reduction=reduction)
+        acuracia_balanceada = smp.metrics.balanced_accuracy(
+            tp, fp, fn, tn, reduction=reduction
+        )
+        iou = smp.metrics.iou_score(tp, fp, fn, tn, reduction=reduction)
+        f1_score = smp.metrics.f1_score(tp, fp, fn, tn, reduction=reduction)
+        f2_score = smp.metrics.fbeta_score(
+            tp, fp, fn, tn, beta=2, reduction=reduction
+        )
+        recall = smp.metrics.recall(tp, fp, fn, tn, reduction=reduction)
 
-    print(f"Acurácia no conjunto de teste: {acuracia:.4f}")
-    print(f"Acurácia Balanceada no conjunto de teste: {acuracia_balanceada:.4f}")
-    print(f"IoU no conjunto de teste: {iou:.4f}")
-    print(f"F1 no conjunto de teste: {f1_score:.4f}")
-    print(f"F2 no conjunto de teste: {f2_score:.4f}")
-    print(f"Recall no conjunto de teste: {recall:.4f}")
-    print(f"Pesos das classes: {class_weights}")
+        print(f"Redução: {reduction}")
+        print(f"Acurácia no conjunto de teste: {acuracia:.4f}")
+        print(f"Acurácia Balanceada no conjunto de teste: {acuracia_balanceada:.4f}")
+        print(f"IoU no conjunto de teste: {iou:.4f}")
+        print(f"F1 no conjunto de teste: {f1_score:.4f}")
+        print(f"F2 no conjunto de teste: {f2_score:.4f}")
+        print(f"Recall no conjunto de teste: {recall:.4f}")
+        print("\n")
 
-    return acuracia, acuracia_balanceada, iou, f1_score, f2_score, recall, class_weights
+    return acuracia, acuracia_balanceada, iou, f1_score, f2_score, recall
