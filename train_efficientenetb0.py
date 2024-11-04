@@ -10,19 +10,17 @@ import metrics
 # <Modelo> pode ser: MOBILENET, RESNET34, RESNET50, EFFICIENTNETB0, EFFICIENTNETB2, EFFICIENTNETB3
 # Para usar modelos diferentes, basta adicionar as variáveis correspondentes no arquivo config.py
 
-# Primeiro Treinamento com as imagens NoLabel
+# Primeiro Treinamento com as imagens 512x512
 tb_logger = TensorBoardLogger(config.DIR_LOG, name=config.NAME_EFFICIENTNETB0)
 
-# Gera o dataframe com as imagem NoLabel
-df_nolabel = rpi.get_image_paths("nolabel", config.DIR_BASE)
+# Gera o dataframe com as imagens 512x512 e 2048x2048
+df_512 = rpi.get_image_paths("high", config.DIR_BASE, proj_shape=512)
+df_2048 = rpi.get_image_paths("high", config.DIR_BASE2, proj_shape=2048)
 
 # Define the datamodule
 datamodule = CoreDataModule(
-    dataframe=df_nolabel,
-    batch_size=config.BATCH_SIZE,
-    train_index_mask=14,
-    val_index_mask=14,
-    test_index_mask=14,
+    dataframe=df_512,
+    batch_size=config.BATCH_SIZE_512
 )
 
 # Define the model
@@ -35,10 +33,10 @@ model = UNet_S2_Br(
 
 checkpoint_callback = pl.callbacks.ModelCheckpoint(
     dirpath=config.DIR_ROOT_EFFICIENTNETB0,
-    filename="{epoch}-{train_loss:.2f}-{val_loss:.2f}-trainNoLabel",
+    filename="{epoch}-{train_loss:.2f}-{val_loss:.2f}-trainHigh512",
     monitor="val_loss",
     mode="min",
-    save_top_k=2,
+    save_top_k=1,
 )
 
 earlystopping_callback = pl.callbacks.EarlyStopping(
@@ -69,58 +67,6 @@ model = UNet_S2_Br.load_from_checkpoint(
     learning_rate=config.LEARNING_RATE,
 )
 
-
-# Executa o segundo treinamento com as imagens Scribble
-checkpoint_callback = pl.callbacks.ModelCheckpoint(
-    dirpath=config.DIR_ROOT_EFFICIENTNETB0,
-    filename="{epoch}-{train_loss:.2f}-{val_loss:.2f}-trainScribble",
-    monitor="val_loss",
-    mode="min",
-    save_top_k=2,
-)
-
-earlystopping_callback = pl.callbacks.EarlyStopping(
-    monitor="val_loss", patience=10, mode="min"
-)
-# Define the callbacks
-callbacks = [checkpoint_callback, earlystopping_callback]
-
-
-tb_logger = TensorBoardLogger(config.DIR_LOG, name=config.NAME_EFFICIENTNETB0)
-
-# Define the trainer
-trainer = pl.Trainer(
-    max_epochs=config.EPOCHS,
-    callbacks=callbacks,
-    log_every_n_steps=1,
-    accelerator=config.ACCELERATOR,
-    precision="16-mixed",
-    logger=tb_logger,
-    default_root_dir=config.DIR_ROOT_EFFICIENTNETB0,
-)
-
-df_scribble = rpi.get_image_paths("scribble", config.DIR_BASE)
-
-# Define the datamodule
-datamodule = CoreDataModule(
-    dataframe=df_scribble,
-    batch_size=config.BATCH_SIZE,
-    train_index_mask=14,
-    val_index_mask=14,
-    test_index_mask=14,
-)
-
-# Start the training
-trainer.fit(model=model, datamodule=datamodule)
-
-# Carregar o melhor modelo diretamente
-model = UNet_S2_Br.load_from_checkpoint(
-    checkpoint_callback.best_model_path,
-    encoder_name=config.ENCODER_NAME_EFFICIENTNETB0,
-    classes=config.CLASSES,
-    in_channels=config.IN_CHANNELS,
-    learning_rate=config.LEARNING_RATE,
-)
 # run val dataset
 val_metrics = trainer.validate(model, datamodule=datamodule, verbose=True)
 print(val_metrics)
@@ -129,13 +75,15 @@ print(val_metrics)
 test_metrics = trainer.test(model, datamodule=datamodule, verbose=True)
 print(test_metrics)
 
-# Executa o treinamento com as imagens HIGH
+acuracia, acuracia_balanceada, iou, f1_score, f2_score, recall = metrics.calculate_metrics(datamodule.test_dataloader(), model.model)
+
+# Executa o treinamento com as imagens HIGH 2048x2048
 checkpoint_callback = pl.callbacks.ModelCheckpoint(
     dirpath=config.DIR_ROOT_EFFICIENTNETB0,
-    filename="{epoch}-{train_loss:.2f}-{val_loss:.2f}-trainHigh",
+    filename="{epoch}-{train_loss:.2f}-{val_loss:.2f}-trainHigh2048",
     monitor="val_loss",
     mode="min",
-    save_top_k=2,
+    save_top_k=1,
 )
 
 earlystopping_callback = pl.callbacks.EarlyStopping(
@@ -146,10 +94,10 @@ callbacks = [checkpoint_callback, earlystopping_callback]
 
 tb_logger = TensorBoardLogger(config.DIR_LOG, name=config.NAME_EFFICIENTNETB0)
 
-df = rpi.get_image_paths("high", config.DIR_BASE)
+df_2048 = rpi.get_image_paths("high", config.DIR_BASE2, proj_shape=2048)
 
 # Define the datamodule
-datamodule = CoreDataModule(dataframe=df, batch_size=config.BATCH_SIZE)
+datamodule = CoreDataModule(dataframe=df_2048, batch_size=config.BATCH_SIZE_2048)
 
 # Define the trainer
 trainer = pl.Trainer(

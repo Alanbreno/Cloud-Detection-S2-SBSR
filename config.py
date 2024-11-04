@@ -17,13 +17,15 @@ NAME_EFFICIENTNETB3 = "Unet_efficientnet-b3"
 # Hiperparâmetros do modelo
 LEARNING_RATE = 0.001
 EPOCHS = 100
-BATCH_SIZE = 16
+BATCH_SIZE_512 = 16
+BATCH_SIZE_2048 = 1
 CLASSES = 4
 IN_CHANNELS = 13
 ACCELERATOR = "auto"
 
 # Diretórios
 DIR_BASE = "/home/mseruffo/"
+DIR_BASE2 = "/home/mseruffo/scratch/"
 DIR_LOG = "/home/mseruffo/Unet/lightning_logs/"
 
 # Diretórios raiz dos modelos
