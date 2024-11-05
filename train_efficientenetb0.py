@@ -57,10 +57,10 @@ trainer = pl.Trainer(
 )
 
 # Start the training
-trainer.fit(model=model, datamodule=datamodule)
+#trainer.fit(model=model, datamodule=datamodule)
 # Carregar o melhor modelo diretamente
 model = UNet_S2_Br.load_from_checkpoint(
-    checkpoint_callback.best_model_path,
+    "/home/mseruffo/Unet/lightning_logs/Unet_efficientnet-b0/epoch=48-train_loss=0.22-val_loss=0.24-trainHigh512.ckpt",
     encoder_name=config.ENCODER_NAME_EFFICIENTNETB0,
     classes=config.CLASSES,
     in_channels=config.IN_CHANNELS,
