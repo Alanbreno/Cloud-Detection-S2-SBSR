@@ -17,7 +17,7 @@ NAME_EFFICIENTNETB3 = "Unet_efficientnet-b3"
 # Hiperparâmetros do modelo
 LEARNING_RATE = 0.001
 EPOCHS = 100
-BATCH_SIZE = 64
+BATCH_SIZE = 3
 CLASSES = 4
 IN_CHANNELS = 13
 ACCELERATOR = "auto"
